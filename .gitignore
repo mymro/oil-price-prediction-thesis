@@ -1,0 +1,12 @@
+
+scraper/.vscode/
+
+scraper/chrome/
+
+scraper/masterarbeitscraperchrome_profile/
+
+scraper/node_modules/
+
+scraper/upi_articles/
+
+scraper/package-lock.json
