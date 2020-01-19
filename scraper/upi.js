@@ -26,7 +26,6 @@ const logger = winston.createLogger({
   });
 
 const max_pages = 5;
-let current_page = 0;
 let running_article_queries = 0;
 
 function generateWaitCondition(running_queries){
@@ -40,11 +39,10 @@ async function getNewArticles(page_pool){
     const my_task = db_helper.get_search_task();
 
     const page = await page_pool.acquire();
-    let nodes;
     logger.info(`Getting articles for ${my_task.search_term} page:${my_task.page}`);
     await page.goto(`https://www.upi.com/search/?s_l=articles&ss=${my_task.search_term}&s_term=ea&offset=${my_task.page}`);
     const $ = cheerio.load(await page.content());
-    nodes = $("div[class='row story list'] > .col-md-12")
+    let nodes = $("div[class='row story list'] > .col-md-12")
     if(nodes.length === 0){
         logger.info(`Articles for ${my_task.search_term} ended on page ${my_task.page}. Jumping to next search term`)
         db_helper.set_search_task_done(my_task.id);
@@ -71,7 +69,7 @@ async function fetchNextArticle(page_pool){
     article.title = $("div.news-head > h1.headline").text();
     article.date = moment.tz($("div.news-head > div.montserrat > div.article-date").text().trim(), "MMM. D, YYYY / h:m a", "Etc/GMT-5").valueOf();
     article.filename = article.date+"_"+article.title.replace(/[\s\\\/\*:\?\"\<\>]+/g, "").substr(0, 10)+".txt";
-    const file = fs.createWriteStream(`./upi_articles/${article.filename}`);
+    const file = fs.createWriteStream(`./upi_articles/${article.filename}`, { encoding: 'utf8' });
     $("article[itemprop='articleBody'] > p").each(function(i, elem){
         file.write($(this).text().replace(/[\r\n]+/g, ""));
     });
@@ -89,7 +87,7 @@ puppeteer.use(blockResourcesPlugin);
 //puppeteer.use(AdblockerPlugin());
 puppeteer.launch({
     headless:true,
-    userDataDir:"./chrome"
+    userDataDir: __dirname+"/chrome"
 }).then(browser=>{
 
     chrome = browser;
@@ -97,7 +95,7 @@ puppeteer.launch({
         create: function() {
             logger.debug("opening new page");
             async function gen(){
-                let page = await browser.newPage();
+                let page = await chrome.newPage();
                 page.setDefaultTimeout(120000);
                 return(page);
             }

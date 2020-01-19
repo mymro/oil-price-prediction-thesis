@@ -10,3 +10,9 @@ scraper/node_modules/
 scraper/upi_articles/
 
 scraper/package-lock.json
+
+scraper/cnbc_articles/
+
+*.txt
+
+vader/.vscode/

@@ -6,10 +6,11 @@ class db_helper{
     constructor(){
         this.update_tasks();
         this.update_articles();
+        this.task_done_helper = {};
     }
 
     update_tasks(){
-        let task_arr = db.prepare("SELECT * FROM config WHERE done <> 1 AND site = 'upi'").all();
+        let task_arr = db.prepare("SELECT * FROM config WHERE done <> 1 AND site = 'cnbc'").all();
         this.search_tasks = {};
         this.search_tasks_page_helper = {};
         for(let elem in task_arr){
@@ -20,36 +21,37 @@ class db_helper{
 
     update_articles(){
         this.articles = new Queue;
-        let articles_arr = db.prepare("SELECT articles.*, config.min_date AS min_date FROM articles LEFT JOIN config ON config.id = articles.search_term WHERE articles.fetched <> 1 AND articles.site = 'upi' ORDER BY articles.id ASC").all();
+        let articles_arr = db.prepare("SELECT articles.*, config.min_date AS min_date FROM articles LEFT JOIN config ON config.id = articles.search_term WHERE articles.fetched <> 1 AND articles.site = 'cnbc' ORDER BY articles.id ASC").all();
         for(let elem in articles_arr){
             this.articles.enqueue(articles_arr[elem]);
         }
     }
 
-    waiting_articles(){
-        return this.articles.size();
+    hasArticles(){
+        return this.articles.size() > 0;
     }
 
-    get_article(){
+    getArticle(){
         return this.articles.dequeue();
     }
 
-    article_downloaded(article){
-        db.prepare("UPDATE articles SET title = ?, date = ?, filename = ?, fetched = 1 WHERE url = ?")
-            .run(article.title, article.date, article.filename, article.url);
+    articleDownloaded(article){
+        db.prepare("UPDATE articles SET filename = ?, fetched = 1 WHERE url = ?")
+            .run(article.filename, article.url);
     }
 
-    has_search_tasks(){
+    hasSearchTasks(){
         return Object.keys(this.search_tasks).length > 0;
     }
 
-    get_search_task(){
+    getSearchTask(){
         const id = Object.keys(this.search_tasks)[0];
         this.search_tasks[id].page += 1;
         return {...this.search_tasks[id]};
     }
 
-    set_search_task_done(id){
+    setSearchTaskDone(id){
+        //TODO add sophisticated logic to log a üage failing after complete was set
         db.prepare("UPDATE config SET done = 1 WHERE id = ?").run(id);
         delete this.search_tasks[id];
     }
@@ -64,22 +66,22 @@ class db_helper{
         }
     }
 
-    page_done(task){
+    pageDone(task){
         if(this.search_tasks_page_helper[task.id].page + 1 === task.page){
             this.search_tasks_page_helper[task.id].page += 1;
             this.check_wating_pages(task);
             db.prepare("UPDATE config SET page = ? WHERE id = ?").run(this.search_tasks_page_helper[task.id].page, task.id);
         }else if(this.search_tasks_page_helper[task.id].page + 1 < task.page){
-            his.search_tasks_page_helper[task.id].waiting.push(task.page);
+            this.search_tasks_page_helper[task.id].waiting.push(task.page);
         }
     }
 
-    add_article(task, url){
+    addArticle(task, article){
         try {
-            db.prepare("INSERT INTO articles(url, search_term, site) VALUES(?, ?, 'upi')").run(url, task.id);
-            this.articles.enqueue({url:url, search_term: task.id, min_date: task.min_date});
+            db.prepare("INSERT INTO articles(url, title, date, search_term, site) VALUES(?, ?, ?, ?, 'cnbc')").run(article.url, article.title, article.date, task.id);
+            this.articles.enqueue({url:article.url, title:article.title, date:article.date, search_term: task.id, min_date: task.min_date});
         } catch (error) {
-            console.log("error");
+            console.log("article already exists");
         }
     }
 }
