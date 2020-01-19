@@ -16,3 +16,7 @@ scraper/cnbc_articles/
 *.txt
 
 vader/.vscode/
+
+sentiment/Masters Thesis-862a18555dfd.json
+
+sentiment/.vscode/
