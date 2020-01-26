@@ -21,11 +21,11 @@ const logger = winston.createLogger({
     format: myFormat,
     transports: [
       new winston.transports.Console(),
-      new winston.transports.File({ filename: 'upi.log'})
+      new winston.transports.File({ filename: 'cnbc.log'})
     ]
   });
 
-const max_pages = 5;
+const max_pages = 2;
 const querly_data = {
     QuerylyKey: '',
     additionalindexes: '',
@@ -64,17 +64,21 @@ async function getNewArticles(page_pool){
         const json = await page.evaluate(() =>  {
             return JSON.parse(document.querySelector("body").innerText); 
         });
-        for(let elem in json.results){
-            let article = {
-                title: json.results[elem]["cn:title"],
-                date: moment(json.results[elem]["datePublished"]).valueOf(),
-                url: json.results[elem]["cn:liveURL"]
-            };
-            if(article.date < task.min_date){
-                done = true;
+        if(json.results.length > 0){
+            for(let elem in json.results){
+                let article = {
+                    title: json.results[elem]["cn:title"],
+                    date: moment(json.results[elem]["datePublished"]).valueOf(),
+                    url: json.results[elem]["cn:liveURL"]
+                };
+                if(article.date < task.min_date){
+                    done = true;
+                }
+                logger.info(`Adding article: ${article.url}`)
+                db_helper.addArticle(task, article);
             }
-            logger.info(`Adding article: ${article.url}`)
-            db_helper.addArticle(task, article);
+        }else{
+            done = true;
         }
     }catch(error){
         done = true;

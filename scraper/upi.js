@@ -25,7 +25,7 @@ const logger = winston.createLogger({
     ]
   });
 
-const max_pages = 5;
+const max_pages = 2;
 let running_article_queries = 0;
 
 function generateWaitCondition(running_queries){
@@ -64,8 +64,14 @@ async function fetchNextArticle(page_pool){
     const article = db_helper.get_article();
     const page = await page_pool.acquire();
     logger.info(`Fetching article from: ${article.url}`);
-    await page.goto(article.url);
-    const $ = cheerio.load(await page.content());
+    let $;
+    try{
+        await page.goto(article.url);
+        $ = cheerio.load(await page.content());
+    }catch(error){
+        logger.error(`failed to fetch: ${article.url}`);
+        return;
+    }
     article.title = $("div.news-head > h1.headline").text();
     article.date = moment.tz($("div.news-head > div.montserrat > div.article-date").text().trim(), "MMM. D, YYYY / h:m a", "Etc/GMT-5").valueOf();
     article.filename = article.date+"_"+article.title.replace(/[\s\\\/\*:\?\"\<\>]+/g, "").substr(0, 10)+".txt";
