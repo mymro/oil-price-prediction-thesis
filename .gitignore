@@ -7,16 +7,12 @@ scraper/masterarbeitscraperchrome_profile/
 
 scraper/node_modules/
 
-scraper/upi_articles/
-
 scraper/package-lock.json
-
-scraper/cnbc_articles/
-
-*.txt
-
-vader/.vscode/
 
 sentiment/Masters Thesis-862a18555dfd.json
 
+sentiment/ibm-credentials.txt
+
 sentiment/.vscode/
+
+sentiment/log.txt
