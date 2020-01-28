@@ -62,7 +62,8 @@ async function getNewArticles(page_pool){
             }
         }catch(error){
             logger.error(error);
-            logger.error(`task faild for ${task.search_term}`)
+            logger.error(`task faild for ${task.search_term}`);
+			page_pool.release(page);
             return;
         }
         db_helper.pageDone(task);
@@ -83,10 +84,11 @@ async function getArticle(article, page, task){
         return;
     }
     const $ = cheerio.load(await page.content());
-    article.filename = article.date+"_"+article.title.replace(/[\s\\\/\*:\?\"\<\>]+/g, "").substr(0, 15)+".txt";
+	const rand = Math.floor(Math.random() * 100);
+    article.filename = article.date+"_"+article.title.replace(/[\s\\\/\*:\?\"\<\>]+/g, "").substr(0, 20)+rand+".txt";
     const file = fs.createWriteStream(`./reuters_articles/${article.filename}`, { encoding: 'utf8' });
     $("div[class='StandardArticleBody_container'] > div[class='StandardArticleBody_body']>p").each(function(i, elem){
-        file.write($(this).text().replace(/[\r\n]+/g, ""));
+        file.write($(this).text().replace(/\s+/g, ""));
     });
 
     logger.info(`downloaded ${article.url}`);

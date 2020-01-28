@@ -100,7 +100,7 @@ async function getArticle(page_pool){
     const file = fs.createWriteStream(`./cnbc_articles/${article.filename}`, { encoding: 'utf8' });
     $("div[class='ArticleBody-articleBody'] > div[class='group']").each(function(i, elem){
         $(this).find("p").each(function(i,elem){
-            file.write($(this).text().replace(/[\r\n]+/g, ""));
+            file.write($(this).text().replace(/\s+/g, ""));
         })
     });
 
