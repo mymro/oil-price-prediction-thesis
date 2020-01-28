@@ -88,7 +88,7 @@ async function getArticle(article, page, task){
     article.filename = article.date+"_"+article.title.replace(/[\s\\\/\*:\?\"\<\>]+/g, "").substr(0, 20)+rand+".txt";
     const file = fs.createWriteStream(`./reuters_articles/${article.filename}`, { encoding: 'utf8' });
     $("div[class='StandardArticleBody_container'] > div[class='StandardArticleBody_body']>p").each(function(i, elem){
-        file.write($(this).text().replace(/\s+/g, ""));
+        file.write($(this).text().replace(/\s+/g, " "));
     });
 
     logger.info(`downloaded ${article.url}`);
