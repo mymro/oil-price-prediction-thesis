@@ -35,7 +35,7 @@ async function getQueryParameters(page_pool){
     let page = await page_pool.acquire();
 
     await page.goto("https://www.cnbc.com/search/?query=arabian%20oil&qsearchterm=arabian%20oil");
-    await page.goto("https://fm.cnbc.com/applications/cnbc.com/resources/search/cnbc-queryly-search-R17.js");
+    await page.goto("https://fm.cnbc.com/applications/cnbc.com/resources/search/cnbc-queryly-search-2020_R02.js");
     const js = await page.content();
     let start = js.indexOf("'", js.indexOf("QuerylyKey:")+10)
     let end = js.indexOf("'", start+1);
@@ -54,8 +54,8 @@ async function getQueryParameters(page_pool){
 }
 
 async function getNewArticles(page_pool){
-    const page = await page_pool.acquire();
     const task = db_helper.getSearchTask();
+    const page = await page_pool.acquire();
     logger.info(`Getting articles for ${task.search_term} on page ${task.page}`);
     await page.goto(`https://api.queryly.com/cnbc/json.aspx?queryly_key=${querly_data.QuerylyKey}&query=${task.search_term}&endindex=${(task.page-1)*10}&batchsize=${10}&callback=&showfaceted=true&timezoneoffset=0&facetedfields=formats&facetedkey=formats%7C&facetedvalue=Articles%7C&sort=date&additionalindexes=${querly_data.additionalindexes}`);
     const content = await page.content();
@@ -82,6 +82,7 @@ async function getNewArticles(page_pool){
         }
     }catch(error){
         done = true;
+        page_pool.release(page);
     }
     if(done){
         db_helper.setSearchTaskDone(task.id);
@@ -100,7 +101,7 @@ async function getArticle(page_pool){
     const file = fs.createWriteStream(`./cnbc_articles/${article.filename}`, { encoding: 'utf8' });
     $("div[class='ArticleBody-articleBody'] > div[class='group']").each(function(i, elem){
         $(this).find("p").each(function(i,elem){
-            file.write($(this).text().replace(/\s+/g, " "));
+            file.write(($(this).text().replace(/\s+/g, " "))+" ");
         })
     });
 
@@ -149,6 +150,8 @@ puppeteer.launch({
     return promise_pool.start();
 }).then(()=>{
     logger.info("done");
+}).catch(error=>{
+    logger.error(error);
 }).finally(()=>{
     chrome.close();
 })

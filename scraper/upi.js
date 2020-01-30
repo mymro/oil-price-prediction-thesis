@@ -25,7 +25,7 @@ const logger = winston.createLogger({
     ]
   });
 
-const max_pages = 2;
+const max_pages = 3;
 let running_article_queries = 0;
 
 function generateWaitCondition(running_queries){
@@ -77,7 +77,7 @@ async function fetchNextArticle(page_pool){
     article.filename = article.date+"_"+article.title.replace(/[\s\\\/\*:\?\"\<\>]+/g, "").substr(0, 10)+".txt";
     const file = fs.createWriteStream(`./upi_articles/${article.filename}`, { encoding: 'utf8' });
     $("article[itemprop='articleBody'] > p").each(function(i, elem){
-        file.write($(this).text().replace(/\s+/g, " "));
+        file.write(($(this).text().replace(/\s+/g, " "))+" ");
     });
     if(article.date < article.min_date){
         db_helper.set_search_task_done(article.search_term);
