@@ -27,3 +27,13 @@ for (dirpath, dirnames, filenames) in walk("../scraper/reuters_articles"):
             f.truncate()
             f.write(text)
     break
+	
+for (dirpath, dirnames, filenames) in walk("../scraper/forbes_articles"):
+    for file in filenames:
+        with open("../scraper/forbes_articles/"+file, "r+", encoding="utf-8") as f:
+            text = re.sub(r"\s+", " ", f.read())
+            f.seek(0)
+            f.truncate()
+            f.write(text)
+    break
+
