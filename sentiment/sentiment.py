@@ -102,3 +102,5 @@ for i in range(8):
 
 [t.start() for t in threads]
 [t.join() for t in threads]
+
+conn.close()

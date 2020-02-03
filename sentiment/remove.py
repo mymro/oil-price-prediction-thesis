@@ -1,6 +1,7 @@
 import re
 from os import walk
 
+
 for (dirpath, dirnames, filenames) in walk("../scraper/upi_articles"):
     for file in filenames:
         with open("../scraper/upi_articles/"+file, "r+", encoding="utf-8") as f:
