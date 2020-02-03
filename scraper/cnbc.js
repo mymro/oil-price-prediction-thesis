@@ -67,7 +67,7 @@ async function getNewArticles(page_pool){
         if(json.results.length > 0){
             for(let elem in json.results){
                 let article = {
-                    title: json.results[elem]["cn:title"],
+                    title: json.results[elem]["cn:title"].replace(/\s+/g, " "),
                     date: moment(json.results[elem]["datePublished"]).valueOf(),
                     url: json.results[elem]["cn:liveURL"]
                 };

@@ -1,0 +1,9 @@
+sqlite> .open db.sqlite3
+sqlite> .headers on
+sqlite> .mode csv
+sqlite> .separator |
+sqlite> .output export.csv
+sqlite> SELECT * FROM articles JOIN config on config.id = articles.search_term
+   ...> ;
+sqlite> .quit
+PS D:\masterarbeit\scraper>

@@ -50,7 +50,7 @@ async function getNewArticles(page_pool){
     $("article").each(function(i,elem){
         let article = {};
         title = $(this).find("div[class='stream-item__text'] > h2");
-        article.title = title.text();
+        article.title = title.text().replace(/\s+/g, " ");
         article.url = title.find("a").attr("href");
         article.date = parseInt($(this).find("div[class='stream-item__text'] > div[class='stream-item__date']").attr("data-date"));
         try{

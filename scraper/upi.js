@@ -72,7 +72,7 @@ async function fetchNextArticle(page_pool){
         logger.error(`failed to fetch: ${article.url}`);
         return;
     }
-    article.title = $("div.news-head > h1.headline").text();
+    article.title = $("div.news-head > h1.headline").text().replace(/\s+/g, " ");
     article.date = moment.tz($("div.news-head > div.montserrat > div.article-date").text().trim(), "MMM. D, YYYY / h:m a", "Etc/GMT+5").valueOf();
     article.filename = article.date+"_"+article.title.replace(/[\s\\\/\*:\?\"\<\>]+/g, "").substr(0, 10)+".txt";
     const file = fs.createWriteStream(`./upi_articles/${article.filename}`, { encoding: 'utf8' });

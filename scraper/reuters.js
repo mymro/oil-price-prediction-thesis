@@ -47,7 +47,7 @@ async function getNewArticles(page_pool){
             if(json.news.length > 0){
                 for(let elem in json.news){
                     let article = {
-                        title: cheerio.load(json.news[elem]["headline"]).text(),
+                        title: cheerio.load(json.news[elem]["headline"]).text().replace(/\s+/g, " "),
                         date: moment.tz(json.news[elem]["date"], "MMMM DD, YYYY hh:mma", "Etc/GMT+5").valueOf(),
                         url: "https://www.reuters.com"+json.news[elem]["href"]
                     };
