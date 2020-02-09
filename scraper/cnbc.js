@@ -67,7 +67,7 @@ async function getNewArticles(page_pool){
         if(json.results.length > 0){
             for(let elem in json.results){
                 let article = {
-                    title: json.results[elem]["cn:title"].replace(/\s+/g, " "),
+                    title: json.results[elem]["cn:title"].replace(/\s+/g, " ").trim(),
                     date: moment(json.results[elem]["datePublished"]).valueOf(),
                     url: json.results[elem]["cn:liveURL"]
                 };
@@ -101,7 +101,7 @@ async function getArticle(page_pool){
     const file = fs.createWriteStream(`./cnbc_articles/${article.filename}`, { encoding: 'utf8' });
     $("div[class='ArticleBody-articleBody'] > div[class='group']").each(function(i, elem){
         $(this).find("p").each(function(i,elem){
-            file.write(($(this).text().replace(/\s+/g, " "))+" ");
+            file.write(($(this).text().replace(/\s+/g, " ")).trim()+" ");
         })
     });
 

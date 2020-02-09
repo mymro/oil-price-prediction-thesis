@@ -47,7 +47,7 @@ async function getNewArticles(page_pool){
             if(json.news.length > 0){
                 for(let elem in json.news){
                     let article = {
-                        title: cheerio.load(json.news[elem]["headline"]).text().replace(/\s+/g, " "),
+                        title: cheerio.load(json.news[elem]["headline"]).text().replace(/\s+/g, " ").trim(),
                         date: moment.tz(json.news[elem]["date"], "MMMM DD, YYYY hh:mma", "Etc/GMT+5").valueOf(),
                         url: "https://www.reuters.com"+json.news[elem]["href"]
                     };
@@ -88,7 +88,7 @@ async function getArticle(article, page, task){
     article.filename = article.date+"_"+article.title.replace(/[\s\\\/\*:\?\"\<\>]+/g, "").substr(0, 20)+rand+".txt";
     const file = fs.createWriteStream(`./reuters_articles/${article.filename}`, { encoding: 'utf8' });
     $("div[class='StandardArticleBody_container'] > div[class='StandardArticleBody_body']>p").each(function(i, elem){
-        file.write(($(this).text().replace(/\s+/g, " "))+" ");
+        file.write(($(this).text().replace(/\s+/g, " ")).trim()+" ");
     });
 
     logger.info(`downloaded ${article.url}`);

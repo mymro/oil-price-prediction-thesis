@@ -1,7 +1,6 @@
 import sqlite3
 import logging
 import json
-from threading import Thread
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from threading import Thread, Lock
 from google.cloud import language

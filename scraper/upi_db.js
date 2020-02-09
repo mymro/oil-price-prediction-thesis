@@ -79,7 +79,7 @@ class db_helper{
             db.prepare("INSERT INTO articles(url, search_term, site) VALUES(?, ?, 'upi')").run(url, task.id);
             this.articles.enqueue({url:url, search_term: task.id, min_date: task.min_date});
         } catch (error) {
-            console.log(error);
+            //console.log(error);
         }
     }
 }

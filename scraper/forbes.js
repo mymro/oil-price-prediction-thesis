@@ -50,7 +50,7 @@ async function getNewArticles(page_pool){
     $("article").each(function(i,elem){
         let article = {};
         title = $(this).find("div[class='stream-item__text'] > h2");
-        article.title = title.text().replace(/\s+/g, " ");
+        article.title = title.text().replace(/\s+/g, " ").trim();
         article.url = title.find("a").attr("href");
         article.date = parseInt($(this).find("div[class='stream-item__text'] > div[class='stream-item__date']").attr("data-date"));
         try{
@@ -81,7 +81,7 @@ async function getArticle(page_pool){
         article.filename = article.date+"_"+article.title.replace(/[\s\\\/\*:\?\"\<\>]+/g, "").substr(0, 20)+".txt";
         const file = fs.createWriteStream(`./forbes_articles/${article.filename}`, { encoding: 'utf8' });
         $("article-body-container > div > div > p").each(function(i, elem){
-            file.write(($(this).text().replace(/\s+/g, " "))+" ");
+            file.write(($(this).text().replace(/\s+/g, " ")).trim()+" ");
         });
     
         db_helper.articleDownloaded(article);

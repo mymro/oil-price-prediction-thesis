@@ -1,40 +1,45 @@
 import re
 from os import walk
+import sqlite3
+from threading import Thread, Lock
+
+conn = sqlite3.connect('../scraper/db.sqlite3', check_same_thread=False)
+conn.row_factory = sqlite3.Row
+article_cursor = conn.cursor()
+article_cursor.arraysize = 5
+article_cursor.execute("SELECT * FROM articles where cleaned <> 1")
+update_cursor = conn.cursor()
+
+db_lock = Lock()
 
 
-for (dirpath, dirnames, filenames) in walk("../scraper/upi_articles"):
-    for file in filenames:
-        with open("../scraper/upi_articles/"+file, "r+", encoding="utf-8") as f:
-            text = re.sub(r"\s+", " ", f.read())
-            f.seek(0)
-            f.truncate()
-            f.write(text)
-    break
+def clean():
+        
+    with db_lock:
+        articles = article_cursor.fetchmany()
 
-for (dirpath, dirnames, filenames) in walk("../scraper/cnbc_articles"):
-    for file in filenames:
-        with open("../scraper/cnbc_articles/"+file, "r+", encoding="utf-8") as f:
-            text = re.sub(r"\s+", " ", f.read())
-            f.seek(0)
-            f.truncate()
-            f.write(text)
-    break
+    while len(articles) > 0:
+        ids = []
+        for article in articles:
+            with open("../scraper/{0}_articles/{1}".format(article["site"], article["filename"]), "r+", encoding="utf-8") as f:
+                text = re.sub(r"\s+", " ", f.read()).strip()
+                f.seek(0)
+                f.truncate()
+                f.write(text)
+                ids.append(article["id"])
+        
+        with db_lock:
+            update_cursor.execute(f"UPDATE articles SET cleaned = 1 WHERE id IN({','.join(['?']*len(ids))})", ids)
+            conn.commit()
+            articles = article_cursor.fetchmany()
 
-for (dirpath, dirnames, filenames) in walk("../scraper/reuters_articles"):
-    for file in filenames:
-        with open("../scraper/reuters_articles/"+file, "r+", encoding="utf-8") as f:
-            text = re.sub(r"\s+", " ", f.read())
-            f.seek(0)
-            f.truncate()
-            f.write(text)
-    break
-	
-for (dirpath, dirnames, filenames) in walk("../scraper/forbes_articles"):
-    for file in filenames:
-        with open("../scraper/forbes_articles/"+file, "r+", encoding="utf-8") as f:
-            text = re.sub(r"\s+", " ", f.read())
-            f.seek(0)
-            f.truncate()
-            f.write(text)
-    break
 
+threads = []
+for i in range(16):
+    process = Thread(target=clean)
+    threads.append(process)
+
+[t.start() for t in threads]
+[t.join() for t in threads]
+
+conn.close()
