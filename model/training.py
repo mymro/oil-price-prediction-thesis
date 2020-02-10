@@ -34,8 +34,8 @@ def series_to_supervised(data, headers, n_in=1, n_out=1, dropnan=True,):
     return agg
 
 # load dataset
-dataset = read_csv('formatted_training_data.csv', header=0, index_col=1)
-dataset.drop("id", axis=1, inplace=True)
+dataset = read_csv('formatted_training_data.csv', header=0, index_col=0)
+dataset.drop("Date", axis=1, inplace=True)
 values = dataset.values
 # ensure all data is float
 values = values.astype('float32')
@@ -60,15 +60,13 @@ train_X = train_X.reshape((train_X.shape[0], steps, features))
 test_X = test_X.reshape((test_X.shape[0], steps, features))
 
 # design network
-print(train_X.shape[1])
-print(train_X.shape[2])
 model = Sequential()
-model.add(LSTM(30, input_shape=(train_X.shape[1], train_X.shape[2])))
+model.add(LSTM(40, input_shape=(train_X.shape[1], train_X.shape[2])))
 model.add(Dense(4))
 model.compile(loss='mae', optimizer='adam')
 # fit network
-es = EarlyStopping(monitor='val_loss', mode='min', patience=10, verbose=1)
-history = model.fit(train_X, train_y, epochs=10000, batch_size=30, validation_data=(test_X, test_y), verbose=2, shuffle=False, callbacks=[es])
+es = EarlyStopping(monitor='val_loss', mode='min', patience=1000, verbose=1, restore_best_weights=True)
+history = model.fit(train_X, train_y, epochs=15000, batch_size=len(train_X), validation_data=(test_X, test_y), verbose=2, shuffle=False, callbacks=[es])
 #plot history
 pyplot.plot(history.history['loss'], label='train')
 pyplot.plot(history.history['val_loss'], label='test')
@@ -78,11 +76,11 @@ pyplot.show()
 step_lines = 6
 future_steps = 5
 
-pyplot.plot(dataset.loc[:,"brent"], label="brent")
+#pyplot.plot(dataset.loc[:,"brent"], label="brent")
 cols = []
 for i in range(0, len(values), step_lines):
     predictions = array(values[i].reshape((steps+1, features))[-1])
-    frame = values[i, :-features].reshape((1, steps, features))
+    frame = array(values[i, :-features].reshape((1, steps, features)), copy=True)
     for j in range(future_steps):
         prediction = model.predict(frame)
         intermediate = append(frame[0], prediction[0]).reshape((steps+1, features))
@@ -94,11 +92,26 @@ for i in range(0, len(values), step_lines):
     arr = append(arr, predictions[:, 3])
     arr = append(arr, [nan for x in range(len(values)-len(predictions[:,3])-i*step_lines)])
     cols.append(DataFrame(arr))
-    pyplot.plot([i+k+steps for k in range(len(predictions))], predictions[:, 3])
+    #pyplot.plot([i+k+steps for k in range(len(predictions))], predictions[:, 3])
 
 df = concat(cols, axis=1)
 df.to_csv("../predictions_out.csv")
+#pyplot.show()
+
+temp = dataset.loc[steps+1:,"brent"]
+prediction = append(model.predict(train_X),model.predict(test_X))
+prediction = prediction.reshape((int(len(prediction)/4),4))
+prediction = scaler.inverse_transform(prediction)
+prediction = prediction[:,3]
+
+pyplot.plot(dataset.loc[:,"brent"], label="brent")
+pyplot.plot([i for i in range(steps+1, steps+1+len(prediction))], prediction, label="predicted")
+pyplot.legend()
 pyplot.show()
+
+df = DataFrame(prediction)
+df.to_csv("../predicted_graph.csv")
+
 #predict
 yhat = model.predict(test_X)
 test_X = test_X.reshape((test_X.shape[0], steps*features))
