@@ -2,17 +2,18 @@ import pandas as pd
 from sklearn import preprocessing
 from sklearn import metrics
 import math
-import keras.models as models
-import keras.layers as layers
-import keras.callbacks as callbacks
+#import keras.models as models
+#import keras.layers as layers
+#import keras.callbacks as callbacks
 from matplotlib import pyplot
 import numpy as np
 import time
+from keras.models import load_model
 import joblib
 
-n_in, m_out = 4,1
+n_in, m_out = 3,1
 y_headers = ["brent"]
-x_headers = ["vader_average", "watson","count","brent"]
+x_headers = ["vader_average", "vader", "watson","count","brent"]
 training_split = 0.80
 
 project_name = "test"
@@ -59,18 +60,21 @@ test_y = scaled_dataset[train_count:, :][:,-len(y_headers)*m_out:]
 train_x = train_x.reshape((train_x.shape[0], n_in, len(x_headers)))
 test_x = test_x.reshape((test_x.shape[0], n_in, len(x_headers)))
 
-model = models.Sequential()
-model.add(layers.LSTM(n_in*3, input_shape=(train_x.shape[1], train_x.shape[2])))
-model.add(layers.Dense(m_out))
-model.compile(loss='mae', optimizer='adam')
+#model = models.Sequential()
+#model.add(layers.LSTM(n_in*3, input_shape=(train_x.shape[1], train_x.shape[2])))
+#model.add(layers.Dense(m_out))
+#model.compile(loss='mae', optimizer='adam')
 
-es = callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=200, verbose=1, restore_best_weights=True)
-history = model.fit(train_x, train_y, epochs=15000, batch_size=len(train_x), validation_data=(test_x, test_y), verbose=2, shuffle=False, callbacks=[es])
+#es = callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=200, verbose=1, restore_best_weights=True)
+#history = model.fit(train_x, train_y, epochs=2, batch_size=len(train_x), validation_data=(test_x, test_y), verbose=2, shuffle=False, callbacks=[es])
 
-pyplot.plot(history.history['loss'], label='train')
-pyplot.plot(history.history['val_loss'], label='test')
-pyplot.legend()
+#pyplot.plot(history.history['loss'], label='train')
+#pyplot.plot(history.history['val_loss'], label='test')
+#pyplot.legend()
 #pyplot.show()
+
+model = load_model("./out/test_1582339221333.h5")
+scaler = joblib.load("./out/test_1582339221333.joblib")
 
 x = np.concatenate((train_x, test_x)).reshape((train_x.shape[0]+test_x.shape[0], n_in, len(x_headers)))
 y = np.concatenate((train_y, test_y))
@@ -82,13 +86,12 @@ y = np.concatenate((x, y), axis = 1)
 y_hat = scaler.inverse_transform(y_hat.reshape((x.shape[0], prepared_dataset.shape[1])))[:,-m_out*len(y_headers):]
 y = scaler.inverse_transform(y.reshape((x.shape[0], prepared_dataset.shape[1])))[:,-m_out*len(y_headers):]
 
+pyplot.plot(y)
+pyplot.plot(y_hat)
+pyplot.show()
+
+
 pd.DataFrame(np.concatenate((y,y_hat), axis=1)).to_csv("out_test.csv")
 
 rmse = math.sqrt(metrics.mean_squared_error(y, y_hat))
 print('Test RMSE: %.3f' % rmse)
-
-now = int(time.time()*1000.0)
-
-joblib.dump(scaler, f'./out/{project_name}_{now}.joblib')
-model.save(f'./out/{project_name}_{now}.h5')
-#TODO also save other paramters inouts outputs, etc.
