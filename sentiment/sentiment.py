@@ -10,6 +10,8 @@ from ibm_watson import NaturalLanguageUnderstandingV1
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from ibm_watson.natural_language_understanding_v1 import Features, SentimentOptions
 from nltk import tokenize
+import sentiment_dictionary as sentiment_dict
+from nltk.tokenize import TweetTokenizer
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -27,7 +29,7 @@ conn = sqlite3.connect('../scraper/db.sqlite3', check_same_thread=False)
 conn.row_factory = sqlite3.Row
 article_cursor = conn.cursor()
 article_cursor.arraysize = 5
-article_cursor.execute("SELECT id, filename, sentiment_vader, sentiment_vader_average, sentiment_gnlp, magnitude_gnlp, sentiment_watson, site FROM articles WHERE sentiment_vader IS NULL OR sentiment_vader_average IS NULL OR sentiment_watson IS NULL AND fetched = 1")
+article_cursor.execute("SELECT * FROM articles WHERE sentiment_vader IS NULL OR sentiment_vader_average IS NULL OR sentiment_watson IS NULL OR sentiment_lm IS NULL OR sentiment_h IS NULL AND fetched = 1")
 update_cursor = conn.cursor()
 
 db_lock = Lock()
@@ -44,6 +46,9 @@ def sentimenAnalysis():
         authenticator=authenticator)
     service.set_service_url('https://gateway.watsonplatform.net/natural-language-understanding/api')
 
+    lm_analyzer = sentiment_dict.SentimentAnalyzer(sentiment_dict.lmdict, TweetTokenizer(), 3)
+    h_analyzer = sentiment_dict.SentimentAnalyzer(sentiment_dict.hdict, TweetTokenizer(), 3)
+
     with db_lock:
         articles = article_cursor.fetchmany()
 
@@ -56,6 +61,8 @@ def sentimenAnalysis():
                 gnlp = article["sentiment_gnlp"]
                 gnlp_m = article["magnitude_gnlp"]
                 watson = article["sentiment_watson"]
+                h = article["sentiment_h"]
+                lm = article["sentiment_lm"]
                 text = fl.read()
                 if(len(text)>0):
                     try:
@@ -83,14 +90,20 @@ def sentimenAnalysis():
                                 features=Features(sentiment=SentimentOptions())
                             ).get_result()
                             watson = response["sentiment"]["document"]["score"]
+                        if(not h):
+                            logger.info("getting Henry, Elaine sentiment")
+                            h = h_analyzer.analyze(text)["compound"]
+                        if(not lm):
+                            logger.info("getting Loughran and McDonald Sentiment")
+                            lm = lm_analyzer.analyze(text)["compound"]
                     except Exception as e:
                         logger.error("error for: " + article["filename"])
                         logger.error(e)
 						
-                update_statements.append((vader, vader_average, gnlp, gnlp_m, watson, article["id"]))
+                update_statements.append((vader, vader_average, gnlp, gnlp_m, watson, lm, h, article["id"]))
 
         with db_lock:
-            update_cursor.executemany("UPDATE articles set sentiment_vader=?, sentiment_vader_average=?, sentiment_gnlp=?, magnitude_gnlp=?, sentiment_watson=? WHERE id=?", update_statements)
+            update_cursor.executemany("UPDATE articles set sentiment_vader=?, sentiment_vader_average=?, sentiment_gnlp=?, magnitude_gnlp=?, sentiment_watson=?, sentiment_lm=?, sentiment_h=? WHERE id=?", update_statements)
             conn.commit()
             articles = article_cursor.fetchmany()
 

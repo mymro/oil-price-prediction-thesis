@@ -8,3 +8,6 @@
 "heating gasoline prices":"https://www.eia.gov/dnav/pet/pet_pri_spt_s1_d.htm"
 "paper for other models":"Are Product Spreads Useful for Forecasting Oil Prices? An Empirical Evaluation of the Verleger Hypothesis"
 "inflation data":"https://data.oecd.org/price/inflation-cpi.htm"
+"finance dictionary lm":"https://sraf.nd.edu/"
+"henry":"https://github.com/sfeuerriegel/SentimentAnalysis/blob/master/data/DictionaryHE.rda"
+"dictionary based methond rise or fall":"Forecasting oil price trends with sentiment of online news articles"
