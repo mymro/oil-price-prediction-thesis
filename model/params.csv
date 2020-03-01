@@ -1,0 +1,8 @@
+,0,1,2,3
+0,0.6953412103064266,0.3827160596847534,0.49999872760509867,"{'optimizer': 'adam', 'init': 'glorot_uniform', 'layer_out': 6, 'patience': 100, 'batch_size': 645}"
+0,0.6956261190367333,0.4197530746459961,0.49943653207149113,"{'optimizer': 'adam', 'init': 'glorot_uniform', 'layer_out': 6, 'patience': 200, 'batch_size': 645}"
+0,0.6998589163945045,0.4197530746459961,0.49917660729698476,"{'optimizer': 'adam', 'init': 'glorot_uniform', 'layer_out': 6, 'patience': 300, 'batch_size': 645}"
+0,0.6944189115806862,0.4197530746459961,0.49997858652167565,"{'optimizer': 'adam', 'init': 'glorot_uniform', 'layer_out': 6, 'patience': 400, 'batch_size': 645}"
+0,0.6975958759402051,0.3641975224018097,0.500856431501283,"{'optimizer': 'adam', 'init': 'glorot_uniform', 'layer_out': 6, 'patience': 500, 'batch_size': 645}"
+0,0.6995454872096026,0.4197530746459961,0.49879965091765144,"{'optimizer': 'adam', 'init': 'glorot_uniform', 'layer_out': 6, 'patience': 600, 'batch_size': 645}"
+0,0.7148856380839407,0.4197530746459961,0.5008622510015674,"{'optimizer': 'adam', 'init': 'glorot_uniform', 'layer_out': 6, 'patience': 700, 'batch_size': 645}"

@@ -127,3 +127,30 @@ inv_y = inv_y[:,0]
 # calculate RMSE
 rmse = sqrt(mean_squared_error(inv_y, inv_yhat))
 print('Test RMSE: %.3f' % rmse)
+
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import GridSearchCV
+
+
+def temp():
+    seed = 7
+    np.random.seed(seed)
+    es = callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=50, verbose=1, restore_best_weights=True)
+    model = KerasClassifier(build_fn=create_binary)
+    param_grid = {
+        "optimizer":['adam', 'Adagrad'], 
+        "epochs":[100, 150, 200], 
+        "batch_size":[5, 10, 20],
+        "init":['glorot_uniform', 'normal'],
+        "layer_out":[len([x_headers]), 8, 10]
+    }
+    grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=1)
+    grid_result = grid.fit(x, y, verbose=2, shuffle=False)
+    means = grid_result.cv_results_['mean_test_score']
+    stds = grid_result.cv_results_['std_test_score']
+    params = grid_result.cv_results_['params']
+    for mean, stdev, param in zip(means, stds, params):
+        print("%f (%f) with: %r" % (mean, stdev, param))
+    print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+
+    params = grid_result.cv_results_['params'][0]
