@@ -38,6 +38,10 @@ def fill_nan(df, column, interpolation_generator):
             last_row = -1
             last_price = 0
 
+def remove_nan(df):
+    df.dropna(inplace=True)
+    df.reset_index(inplace=True)
+
 def add_change(df, column, timespan):
     change = np.full(df.shape[0], np.nan, dtype=float)
     for i in range(df.shape[0]-timespan):
@@ -58,10 +62,11 @@ def add_future_trend(df, column, timespan):
             trend[i] = 0
     df[f'trend_{column}_{timespan}'] = trend
 
-fill_nan(dataset, "WTI", linear_interpolation)
+#fill_nan(dataset, "WTI", linear_interpolation)
+remove_nan(dataset)
 print(dataset)
-#add_change(dataset, "WTI", 1)
-#add_change(dataset, "WTI", 2)
+add_change(dataset, "WTI", 1)
+add_change(dataset, "WTI", 2)
 #add_change(dataset, "WTI", 3)
 #add_change(dataset, "WTI", 5)
 add_future_trend(dataset, "WTI", 1)
