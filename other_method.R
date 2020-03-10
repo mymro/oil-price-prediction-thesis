@@ -1,9 +1,9 @@
 library('openxlsx')
+library('lubridate')
 data <- other_method
 data$Date = convertToDateTime(data$Date, origin = "1900-01-01", tz="America/New_York")
 data= data[order(data$Date),]
 
-library('lubridate')
 inflation = inflation_data
 inflation$TIME = convertToDateTime(inflation$TIME, origin = "1900-01-01", tz="Europe/London")
 inflation = inflation[order(inflation$TIME),]
@@ -33,6 +33,7 @@ data$oil_log_diff[1:(nrow(data)-1)] = diff(data$wti_log)
 data$weighted = log(data$`heating oil.New York Harbor No. 2 Heating Oil Spot Price FOB (Dollars per Gallon`)
 data$diff = data$weighted-data$oil_log_diff
 
+data = na.omit(data)
 data$no_change = NA
 data$no_change[2:nrow(data)] = data$real_wti[1:nrow(data)-1]
 
@@ -54,7 +55,18 @@ no = sqrt(sum((data$real_wti - data$no_change)^2)/nrow(data))
 
 pred/no
 
+limited_data <- data[data$Date >= "2017-11-17 00:00:00" & data$Date < "2020-02-09",]
+
+pred = sqrt(sum((limited_data$real_wti - limited_data$p_hat_shifted)^2)/nrow(limited_data))
+no = sqrt(sum((limited_data$real_wti - limited_data$no_change)^2)/nrow(limited_data))
+
+pred/no
+
 plot(data$Date, data$real_wti, type="l", col="blue")
 lines(data$Date, data$p_hat_shifted, col="red", type="l")
+
+plot(limited_data$Date, limited_data$real_wti, type="l", col="blue")
+lines(limited_data$Date, limited_data$p_hat_shifted, col="red", type="l")
+lines(limited_data$Date, limited_data$no_change, col="red", type="l")
 
 plot(data$Date, data$p_hat_shifted - data$real_wti, type = "l")

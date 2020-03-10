@@ -71,7 +71,7 @@ add_change(dataset, "WTI", 2)
 #add_change(dataset, "WTI", 5)
 add_future_trend(dataset, "WTI", 1)
 add_future_trend(dataset, "WTI", 2)
-add_future_trend(dataset, "WTI", 3)
+#add_future_trend(dataset, "WTI", 3)
 #add_future_trend(dataset, "WTI", 5)
 
 

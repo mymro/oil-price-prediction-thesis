@@ -13,7 +13,7 @@ import joblib
 n_in, m_out = 3,1
 m_offset = 0
 y_headers = ["WTI"]
-x_headers = ["WTI"]
+x_headers = ["WTI","vader_average","vader"]
 training_split = 0.80
 
 project_name = "test"
@@ -50,6 +50,7 @@ dataset.drop("Date", axis=1, inplace=True)
 dataset.astype('float32')
 
 prepared_dataset = series_to_supervised(dataset, x_headers, y_headers, n_in=n_in, m_out=m_out, m_offset=m_offset)
+print(prepared_dataset)
 scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
 scaled_dataset = scaler.fit_transform(prepared_dataset)
 
@@ -112,33 +113,36 @@ def find_best():
 params = {
     "optimizer":"adam",
     "init":"normal",
-    "layer_out":9,
-    "patience":1400,
+    "layer_out":12,
+    "patience":2000,
     "batch_size":train_x.shape[0],
     "dropout":0
 }
 
-es = callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=params['patience'], verbose=1, restore_best_weights=True)
-model = create_binary(optimizer=params['optimizer'], init=params['init'], layer_out=params['layer_out'], dropout=params['dropout'])
-model.fit(train_x, train_y, epochs=40000, batch_size=params['batch_size'], validation_data=(test_x, test_y), verbose = 2, callbacks=[es])
+rmse = 0
+for i in range(20):
+    es = callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=params['patience'], verbose=1, restore_best_weights=True)
+    model = create_binary(optimizer=params['optimizer'], init=params['init'], layer_out=params['layer_out'], dropout=params['dropout'])
+    model.fit(train_x, train_y, epochs=40000, batch_size=params['batch_size'], validation_data=(test_x, test_y), verbose = 2, callbacks=[es])
 
+    x = scaled_dataset[:, :][:,:-len(y_headers)*m_out]
+    y = scaled_dataset[:, :][:,-len(y_headers)*m_out:]
+    x = x.reshape((x.shape[0], n_in, len(x_headers)))
 
-x = scaled_dataset[:, :][:,:-len(y_headers)*m_out]
-y = scaled_dataset[:, :][:,-len(y_headers)*m_out:]
-x = x.reshape((x.shape[0], n_in, len(x_headers)))
+    y_hat = model.predict(x)
+    x = x.reshape(x.shape[0], n_in*x.shape[2])
+    y_hat = np.concatenate((x, y_hat), axis = 1)
+    y = np.concatenate((x, y), axis = 1)
 
-y_hat = model.predict(x)
-x = x.reshape(x.shape[0], n_in*x.shape[2])
-y_hat = np.concatenate((x, y_hat), axis = 1)
-y = np.concatenate((x, y), axis = 1)
+    y_hat = scaler.inverse_transform(y_hat.reshape((x.shape[0], prepared_dataset.shape[1])))[:,-m_out*len(y_headers):]
+    y = scaler.inverse_transform(y.reshape((x.shape[0], prepared_dataset.shape[1])))[:,-m_out*len(y_headers):]
 
-y_hat = scaler.inverse_transform(y_hat.reshape((x.shape[0], prepared_dataset.shape[1])))[:,-m_out*len(y_headers):]
-y = scaler.inverse_transform(y.reshape((x.shape[0], prepared_dataset.shape[1])))[:,-m_out*len(y_headers):]
+    rmse += math.sqrt(metrics.mean_squared_error(y, y_hat))
+
 
 pd.DataFrame(np.concatenate((y,y_hat), axis=1)).to_csv("out_test.csv")
 
-rmse = math.sqrt(metrics.mean_squared_error(y, y_hat))
-print('Test RMSE: %.3f' % rmse)
+print('Test average RMSE: %.5f' % (rmse/20))
 
 now = int(time.time()*1000.0)
 
