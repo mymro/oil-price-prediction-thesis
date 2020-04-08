@@ -67,6 +67,6 @@ lines(data$Date, data$p_hat_shifted, col="red", type="l")
 
 plot(limited_data$Date, limited_data$real_wti, type="l", col="blue")
 lines(limited_data$Date, limited_data$p_hat_shifted, col="red", type="l")
-lines(limited_data$Date, limited_data$no_change, col="red", type="l")
+lines(limited_data$Date, limited_data$no_change, col="green", type="l")
 
 plot(data$Date, data$p_hat_shifted - data$real_wti, type = "l")

@@ -63,6 +63,13 @@ def add_future_trend(df, column, timespan):
     df[f'trend_{column}_{timespan}'] = trend
 
 #fill_nan(dataset, "WTI", linear_interpolation)
+#fill_nan(dataset, "vader", linear_interpolation)
+#fill_nan(dataset, "vader_average", linear_interpolation)
+#fill_nan(dataset, "henry", linear_interpolation)
+#fill_nan(dataset, "Loughran-McDonald", linear_interpolation)
+#fill_nan(dataset, "average_sentiment", linear_interpolation)
+#fill_nan(dataset, "count", linear_interpolation)
+#fill_nan(dataset, "watson", linear_interpolation)
 remove_nan(dataset)
 print(dataset)
 add_change(dataset, "WTI", 1)

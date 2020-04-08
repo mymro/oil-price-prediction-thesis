@@ -1,0 +1,3 @@
+Test average RMSE: 0.18490
+Test average profit: 60.12850
+Test average max_money: 305.59550

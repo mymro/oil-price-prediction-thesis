@@ -1,0 +1,11 @@
+Test average RMSE: 1.19585 
+Test average profit: 158.27150 
+Test average max_money: 1076.80250 
+n_in:3
+m_out:1
+m_offset:0
+relative:False
+y_headers:['WTI']
+x_headers:['WTI', 'henry', 'Loughran-McDonald']
+training_split:0.8
+rounds:20
