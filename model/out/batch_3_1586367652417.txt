@@ -1,0 +1,11 @@
+Test average RMSE: 1.25575 
+Test average profit: 263.07600 
+Test average max_money: 1290.77290 
+n_in:3
+m_out:1
+m_offset:0
+relative:False
+y_headers:['WTI']
+x_headers:['WTI', 'vader_average', 'vader']
+training_split:0.8
+rounds:100

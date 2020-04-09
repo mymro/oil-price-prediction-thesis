@@ -26,7 +26,7 @@ tasks = [
         'y_headers':["WTI"],
         'x_headers':["WTI","henry","Loughran-McDonald","vader_average","vader","watson"],
         'training_split':0.80,
-        'rounds':20,
+        'rounds':100,
     },
     {
         'n_in':3, 
@@ -36,7 +36,7 @@ tasks = [
         'y_headers':["WTI"],
         'x_headers':["WTI","vader_average","vader"],
         'training_split':0.80,
-        'rounds':20,
+        'rounds':100,
     },
     {
         'n_in':3, 
@@ -46,7 +46,7 @@ tasks = [
         'y_headers':["WTI"],
         'x_headers':["WTI","henry","Loughran-McDonald"],
         'training_split':0.80,
-        'rounds':20,
+        'rounds':100,
     },
     {
         'n_in':3, 
@@ -56,7 +56,7 @@ tasks = [
         'y_headers':["WTI"],
         'x_headers':["WTI","watson"],
         'training_split':0.80,
-        'rounds':20,
+        'rounds':100,
     },
     {
         'n_in':3, 
@@ -66,7 +66,7 @@ tasks = [
         'y_headers':["WTI"],
         'x_headers':["WTI"],
         'training_split':0.80,
-        'rounds':20,
+        'rounds':100,
     },
     {
         'n_in':3, 
@@ -76,7 +76,7 @@ tasks = [
         'y_headers':["change_WTI_1"],
         'x_headers':["WTI"],
         'training_split':0.80,
-        'rounds':20,
+        'rounds':100,
     },
     {
         'n_in':3, 
@@ -86,7 +86,7 @@ tasks = [
         'y_headers':["change_WTI_1"],
         'x_headers':["WTI","henry","Loughran-McDonald","vader_average","vader","watson"],
         'training_split':0.80,
-        'rounds':20,
+        'rounds':100,
     },
     {
         'n_in':3, 
@@ -96,7 +96,7 @@ tasks = [
         'y_headers':["change_WTI_1"],
         'x_headers':["WTI","vader_average","vader"],
         'training_split':0.80,
-        'rounds':20,
+        'rounds':100,
     },
     {
         'n_in':3, 
@@ -106,7 +106,7 @@ tasks = [
         'y_headers':["change_WTI_1"],
         'x_headers':["WTI","henry","Loughran-McDonald"],
         'training_split':0.80,
-        'rounds':20,
+        'rounds':100,
     },
     {
         'n_in':3, 
@@ -116,11 +116,11 @@ tasks = [
         'y_headers':["change_WTI_1"],
         'x_headers':["WTI","watson"],
         'training_split':0.80,
-        'rounds':20,
+        'rounds':100,
     },
 ]
 
-project_name = "batch"
+project_name = "batch_3"
 
 def series_to_supervised(data, x, y, n_in=1, m_out=1, m_offset=0, dropnan=True,):
     df = pd.DataFrame(data, copy=True)
