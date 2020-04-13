@@ -1,17 +1,23 @@
 library(vars)
 formatted_training_data = formatted_training_data[order(formatted_training_data$Date),]
-var_training_data<- formatted_training_data[c("watson", "vader", "vader_average", "henry", "WTI")]
+var_training_data<- formatted_training_data[c("watson", "vader", "vader_average", "Loughran.McDonald", "henry", "WTI")]
 
 var_1 <- VAR(var_training_data, lag.max=10, type="none", ic = "AIC")
 
 fitted <- fitted(var_1)
 
-plot(fitted(var_1)[,"WTI"], type="l", col="blue")
-lines(formatted_training_data[4:nrow(formatted_training_data),"WTI"], col="red")
+plot(fitted(var_1)[,"WTI"], type="l", col="red")
+lines(formatted_training_data[4:nrow(formatted_training_data),"WTI"], col="blue")
 
 sqrt(mean((fitted(var_1)[,"WTI"]-formatted_training_data[4:nrow(formatted_training_data),"WTI"])^2))
 
 summary(var_1)
+
+ar <- arima(formatted_training_data$WTI, order=c(3, 0, 0))
+y_hat <- formatted_training_data$WTI-ar$residuals
+sqrt(mean((ar$residuals)^2))
+plot(formatted_training_data$WTI, type="l", col="blue")
+lines(formatted_training_data$WTI-ar$residuals, col="red")
 
 ir.1 <- irf(var_1, impulse = "watson", response = "WTI", n.ahead = 20, ortho = FALSE)
 plot(ir.1)
@@ -49,3 +55,39 @@ lines(no_change ~ Date, plot_data, col="red", type="l", lty=2)
 lines(VAR ~ Date, plot_data, col="darkgreen", type="l", lty=3)
 lines(machine ~ Date, plot_data, col="goldenrod3", type="l", lty=2)
 legend(x="bottomleft", legend=c("WTI", "No Change", "VAR", "Machine Learning"), col=c("blue", "red", "darkgreen", "goldenrod3"), lty=c(1,2,3,2))
+
+
+prediction = fitted[,"WTI"]
+
+sum_profit = 0
+sum_max_value = 0
+rounds = 1
+
+for(i in 1:rounds){
+  max_value = 0
+  barrels = 0
+  value = 0
+  profit = 0
+  
+  for(index in 3:(length(formatted_training_data$WTI)-1)){
+    current_price = formatted_training_data$WTI[index]
+    if(prediction[(index-2)] > current_price ){
+      barrels = barrels + 1
+      value = value + current_price
+      if(value > max_value){
+        max_value = value
+      }
+    }else{
+      profit = profit + barrels * current_price - value
+      barrels = 0
+      value = 0
+    }
+  }
+  
+  sum_profit = sum_profit + profit
+  sum_max_value = sum_max_value + max_value
+}
+
+print(sum_profit/rounds)
+print(sum_max_value/rounds)
+print((sum_profit/rounds)/(sum_max_value/rounds))

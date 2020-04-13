@@ -9,7 +9,7 @@ for(i in 1:rounds){
   value = 0
   profit = 0
   
-  for(index in 3:length(formatted_training_data$WTI)){
+  for(index in 4:length(formatted_training_data$WTI)){
     current_price = formatted_training_data$WTI[index]
     if(round(runif(1)) == 1){
       barrels = barrels + 1
@@ -30,3 +30,4 @@ for(i in 1:rounds){
 
 print(sum_profit/rounds)
 print(sum_max_value/rounds)
+print((sum_profit/rounds)/(sum_max_value/rounds))

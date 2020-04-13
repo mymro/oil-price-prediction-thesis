@@ -55,7 +55,7 @@ no = sqrt(sum((data$real_wti - data$no_change)^2)/nrow(data))
 
 pred/no
 
-limited_data <- data[data$Date >= "2017-11-17 00:00:00" & data$Date < "2020-02-09",]
+limited_data <- data[data$Date >= "2017-11-18 00:00:00" & data$Date < "2020-02-08",]
 
 pred = sqrt(sum((limited_data$real_wti - limited_data$p_hat_shifted)^2)/nrow(limited_data))
 no = sqrt(sum((limited_data$real_wti - limited_data$no_change)^2)/nrow(limited_data))
@@ -70,3 +70,71 @@ lines(limited_data$Date, limited_data$p_hat_shifted, col="red", type="l")
 lines(limited_data$Date, limited_data$no_change, col="green", type="l")
 
 plot(data$Date, data$p_hat_shifted - data$real_wti, type = "l")
+
+
+sum_profit = 0
+sum_max_value = 0
+rounds = 10000
+
+for(i in 1:rounds){
+  max_value = 0
+  barrels = 0
+  value = 0
+  profit = 0
+  
+  for(index in 1:length(data$real_wti)){
+    current_price = data$`Cushing, OK WTI Spot Price FOB (Dollars per Barrel)`[index]
+    if(round(runif(1)) == 1){
+      barrels = barrels + 1
+      value = value + current_price
+      if(value > max_value){
+        max_value = value
+      }
+    }else{
+      profit = profit + barrels * current_price - value
+      barrels = 0
+      value = 0
+    }
+  }
+  
+  sum_profit = sum_profit + profit
+  sum_max_value = sum_max_value + max_value
+}
+
+print(sum_profit/rounds)
+print(sum_max_value/rounds)
+print((sum_profit/rounds)/(sum_max_value/rounds))
+
+sum_profit = 0
+sum_max_value = 0
+rounds = 1
+
+for(i in 1:rounds){
+  max_value = 0
+  barrels = 0
+  value = 0
+  profit = 0
+  
+  for(index in 1:length(limited_data$real_wti)){
+    current_price = limited_data$`Cushing, OK WTI Spot Price FOB (Dollars per Barrel)`[index]
+    if(limited_data$p_hat[index] > limited_data$real_wti[index]){
+      print("hi")
+      barrels = barrels + 1
+      value = value + current_price
+      if(value > max_value){
+        max_value = value
+      }
+    }else{
+      profit = profit + barrels * current_price - value
+      barrels = 0
+      value = 0
+    }
+  }
+  
+  sum_profit = sum_profit + profit
+  sum_max_value = sum_max_value + max_value
+}
+
+print(sum_profit/rounds)
+print(sum_max_value/rounds)
+print((sum_profit/rounds)/(sum_max_value/rounds))
